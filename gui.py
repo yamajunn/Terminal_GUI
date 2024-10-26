@@ -26,26 +26,32 @@ count = 0
 terminal_cursor_x = 0
 terminal_cursor_y = 0
 
+button_list = [terminal_size.columns//2-5, terminal_size.columns //
+               2+5, terminal_size.lines//2-1, terminal_size.lines//2+1]
 
-def button():
+
+def button(button_list):
     display = [[" " for _ in range(terminal_size.columns)]
                for _ in range(terminal_size.lines)]
-    display[terminal_size.lines//2][terminal_size.columns //
-                                    2-5:terminal_size.columns//2 + 5] = ["#" for _ in range(10)]
+    for button_y in range(button_list[2], button_list[3]):
+        display[button_y][button_list[0]:button_list[1]] = [
+            "#" for _ in range(button_list[1]-button_list[0])]
     for d in display:
         print("".join(d))
 
 
-def button_press():
+def button_press(button_list):
     os.system("clear")
     display = [[" " for _ in range(terminal_size.columns)]
                for _ in range(terminal_size.lines)]
-    display[terminal_size.lines//2][terminal_size.columns //
-                                    2-5:terminal_size.columns//2 + 5] = ["_" for _ in range(10)]
+    for button_y in range(button_list[2], button_list[3]):
+        display[button_y][button_list[0]:button_list[1]] = [
+            "_" for _ in range(button_list[1]-button_list[0])]
     for d in display:
         print("".join(d))
-    display[terminal_size.lines//2][terminal_size.columns //
-                                    2-5:terminal_size.columns//2 + 5] = ["#" for _ in range(10)]
+    for button_y in range(button_list[2], button_list[3]):
+        display[button_y][button_list[0]:button_list[1]] = [
+            "#" for _ in range(button_list[1]-button_list[0])]
     time.sleep(0.5)
     for d in display:
         print("".join(d))
@@ -75,11 +81,12 @@ def on_move(mouse_x, mouse_y):
 
 
 def on_click(x, y, button, pressed):
-    if pressed and terminal_size.columns//2-5 <= terminal_cursor_x <= terminal_size.columns//2+5 and terminal_size.lines//2-2 <= terminal_cursor_y <= terminal_size.lines//2:
-        button_press()
+    if pressed:
+        if button_list[0] <= terminal_cursor_x <= button_list[1] and button_list[2] <= terminal_cursor_y <= button_list[3]:
+            button_press(button_list)
 
 
-button()
+button(button_list)
 
 with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
     listener.join()
