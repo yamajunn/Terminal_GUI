@@ -3,6 +3,10 @@ import subprocess
 import shutil
 import os
 import time
+import unicodedata
+
+# ターミナルのカーソルを非表示にする
+# os.system("tput civis")
 
 # AppleScriptを用いてターミナルウィンドウの位置とサイズを取得
 script = '''
@@ -26,39 +30,40 @@ count = 0
 terminal_cursor_x = 0
 terminal_cursor_y = 0
 
-button_list = [terminal_size.columns//2-5, terminal_size.columns //
-               2+5, terminal_size.lines//2-1, terminal_size.lines//2+1]
+cursor_under_str = ""
 
 
-def button(button_list):
-    display = [[" " for _ in range(terminal_size.columns)]
-               for _ in range(terminal_size.lines)]
-    for button_y in range(button_list[2], button_list[3]):
-        display[button_y][button_list[0]:button_list[1]] = [
-            "#" for _ in range(button_list[1]-button_list[0])]
-    for d in display:
-        print("".join(d))
+def button(b):
+    global display
+    for i, s in enumerate(b[2]):
+        if unicodedata.east_asian_width(s) == "W":
+            del display[b[1]][b[0]+i]
+        display[b[1]][b[0]+i] = s
 
 
-def button_press(button_list):
+def button_press(b):
+    global display
     os.system("clear")
-    display = [[" " for _ in range(terminal_size.columns)]
-               for _ in range(terminal_size.lines)]
-    for button_y in range(button_list[2], button_list[3]):
-        display[button_y][button_list[0]:button_list[1]] = [
-            "_" for _ in range(button_list[1]-button_list[0])]
+    for i, s in enumerate(b[2]):
+        w_count = 0
+        if unicodedata.east_asian_width(s) == "W":
+            del display[b[1]][b[0]+i]
+            display[b[1]][b[0]+i] = "_"
+            display[b[1]][b[0]+i+1] = "_"
+            w_count += 1[0, 11, 2, 3, 4, 5]
+        else:
+            display[b[1]][b[0]+i] = "_"
     for d in display:
-        print("".join(d))
-    for button_y in range(button_list[2], button_list[3]):
-        display[button_y][button_list[0]:button_list[1]] = [
-            "#" for _ in range(button_list[1]-button_list[0])]
+        print("\n"+"".join(d), end="")
+    for i, s in enumerate(b[2]):
+        display[b[1]][b[0]+i] = s
     time.sleep(0.5)
     for d in display:
-        print("".join(d))
+        print("\n"+"".join(d), end="")
 
 
 def on_move(mouse_x, mouse_y):
-    global x, y, width, height, terminal_size, count, terminal_cursor_x, terminal_cursor_y
+    global x, y, width, height, terminal_size, count, terminal_cursor_x, terminal_cursor_y, display, cursor_under_str
     if count > 50:
         terminal_size = shutil.get_terminal_size()
 
@@ -68,25 +73,53 @@ def on_move(mouse_x, mouse_y):
         output = result.stdout.decode().strip()
         x, y, width, height = map(int, output.replace(",", "").split())
         count = 0
+        # os.system("clear")
     count += 1
 
     if x < mouse_x < x + width and y < mouse_y < y + height:
         terminal_cursor_x = int((mouse_x - x) / width * terminal_size.columns)
-        terminal_cursor_y = int((mouse_y - y) / height * terminal_size.lines)
+        terminal_cursor_y = int(
+            (mouse_y - y) / height * (terminal_size.lines+0.8))
     else:
         terminal_cursor_x = 0
         terminal_cursor_y = 0
+
+    print(f"\033[{terminal_cursor_y};{terminal_cursor_x}H", end="")
+    # cursor_under_str = display[terminal_cursor_y][terminal_cursor_x]
+    # display[terminal_cursor_y][terminal_cursor_x] = "X"
+    # print(f"\033[0;0H", end="")
+    # for d in display:
+    #     print("\n"+"".join(d), end="")
+    # display[terminal_cursor_y][terminal_cursor_x] = cursor_under_str
 
 # マウスのクリックを監視
 
 
 def on_click(x, y, button, pressed):
     if pressed:
-        if button_list[0] <= terminal_cursor_x <= button_list[1] and button_list[2] <= terminal_cursor_y <= button_list[3]:
-            button_press(button_list)
+        for b in button_list:
+            if b[0] <= terminal_cursor_x < b[0]+len(b[2]) and b[1] == terminal_cursor_y:
+                button_press(b)
 
 
-button(button_list)
+look_path = "./"
+files = os.listdir(look_path)
+
+button_list = []
+for i, f in enumerate(files):
+    if i == terminal_size.lines:
+        break
+    button_list.append([10, i, f])
+print(len(button_list))
+print(terminal_size.lines)
+
+display = [["#" for _ in range(terminal_size.columns)]
+           for _ in range(terminal_size.lines)]
+
+for b in button_list:
+    button(b)
+for d in display:
+    print("\n"+"".join(d), end="")
 
 with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
     listener.join()
