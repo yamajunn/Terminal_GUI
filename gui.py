@@ -32,6 +32,11 @@ terminal_cursor_y = 0
 
 cursor_under_str = ""
 
+look_path = "./"
+
+display = [[" " for _ in range(terminal_size.columns)]
+           for _ in range(terminal_size.lines)]
+
 
 def button(b):
     global display
@@ -43,21 +48,22 @@ def button(b):
 
 def button_press(b):
     global display
-    os.system("clear")
+    b[2] = b[2][1:]
+    w_count = 0
     for i, s in enumerate(b[2]):
-        w_count = 0
+        display[b[1]][b[0]+i] = "_"
         if unicodedata.east_asian_width(s) == "W":
-            del display[b[1]][b[0]+i]
-            display[b[1]][b[0]+i] = "_"
-            display[b[1]][b[0]+i+1] = "_"
-            w_count += 1[0, 11, 2, 3, 4, 5]
-        else:
-            display[b[1]][b[0]+i] = "_"
+            w_count += 1
+    for i in range(w_count):
+        display[b[1]].insert(b[0], "_")
     for d in display:
         print("\n"+"".join(d), end="")
     for i, s in enumerate(b[2]):
+        if unicodedata.east_asian_width(s) == "W":
+            del display[b[1]][b[0]+i]
         display[b[1]][b[0]+i] = s
-    time.sleep(0.5)
+    time.sleep(0.2)
+    os.system("clear")
     for d in display:
         print("\n"+"".join(d), end="")
 
@@ -96,30 +102,39 @@ def on_move(mouse_x, mouse_y):
 
 
 def on_click(x, y, button, pressed):
+    global look_path
     if pressed:
-        for b in button_list:
+        for b in button_creater(look_path):
             if b[0] <= terminal_cursor_x < b[0]+len(b[2]) and b[1] == terminal_cursor_y:
                 button_press(b)
+                look_path += f"{b[2]}/"
+    display_creater()
 
 
-look_path = "./"
-files = os.listdir(look_path)
+def button_creater(look_path):
+    files = os.listdir(look_path)
 
-button_list = []
-for i, f in enumerate(files):
-    if i == terminal_size.lines:
-        break
-    button_list.append([10, i, f])
-print(len(button_list))
-print(terminal_size.lines)
+    button_list = []
+    for i, f in enumerate(files):
+        if i == terminal_size.lines:
+            break
+        if os.path.isdir(os.path.join(look_path, f)):
+            f = "📁" + f
+        button_list.append([10, i, f])
+    return button_list
 
-display = [["#" for _ in range(terminal_size.columns)]
-           for _ in range(terminal_size.lines)]
 
-for b in button_list:
-    button(b)
-for d in display:
-    print("\n"+"".join(d), end="")
+def display_creater():
+    global display
+    display = [[" " for _ in range(terminal_size.columns)]
+               for _ in range(terminal_size.lines)]
+    for b in button_creater(look_path):
+        button(b)
+    for d in display:
+        print("\n"+"".join(d), end="")
+
+
+display_creater()
 
 with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
     listener.join()
