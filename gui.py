@@ -60,7 +60,7 @@ def on_move(mouse_x, mouse_y):
         terminal_cursor_x = 0
         terminal_cursor_y = 0
 
-    print(f"\033[{terminal_cursor_y};{terminal_cursor_x}H", end="")
+    print(f"\033[{terminal_cursor_y+1};{terminal_cursor_x+1}H", end="")
 
 # マウスのクリックを監視
 
@@ -68,9 +68,9 @@ def on_move(mouse_x, mouse_y):
 def on_click(x, y, button, pressed):
     global folder_path_list, display
     if pressed:
-        for i, f in enumerate(folder_path_list):
-            for b in button_list.button_list(f, terminal_size, i):
-                if b[0] <= terminal_cursor_x < b[0]+len(b[2][2:]) and b[1] == terminal_cursor_y:
+        for x, f in enumerate(folder_path_list):
+            for b in button_list.button_list(f, terminal_size, x):
+                if b[0] <= terminal_cursor_x < b[0]+len(b[2]) and b[1] == terminal_cursor_y:
                     button_press.button_press(b, display)
                     folder_path_list.append(
                         f"{folder_path_list[-1]}{b[2][2:]}/")
