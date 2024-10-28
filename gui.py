@@ -5,6 +5,8 @@ import shutil
 import button_list
 import button_press
 import display_creater
+import folder_path_split
+import folder_select
 
 # ターミナルのカーソルを非表示にする
 # os.system("tput civis")
@@ -33,10 +35,10 @@ terminal_cursor_y = 0
 
 cursor_under_str = ""
 
-folder_path_list = ["./"]
+folder_path = "./"
 
-display = [[" " for _ in range(terminal_size.columns)]
-           for _ in range(terminal_size.lines)]
+# display = [[" " for _ in range(terminal_size.columns)]
+#            for _ in range(terminal_size.lines)]
 
 
 def on_move(mouse_x, mouse_y):
@@ -66,19 +68,19 @@ def on_move(mouse_x, mouse_y):
 
 
 def on_click(x, y, button, pressed):
-    global folder_path_list, display
+    global folder_path, display
     if pressed:
-        for x, f in enumerate(folder_path_list):
-            for b in button_list.button_list(f, terminal_size, x):
+        folder_path_list = folder_path_split.folder_path_split(folder_path)
+        for i, f in enumerate(folder_path_list):
+            for b in button_list.button_list(f, terminal_size, i):
                 if b[0] <= terminal_cursor_x < b[0]+len(b[2]) and b[1] == terminal_cursor_y:
                     button_press.button_press(b, display)
-                    folder_path_list.append(
-                        f"{folder_path_list[-1]}{b[2][2:]}/")
-                    display = display_creater.display_creater(
-                        terminal_size, folder_path_list)
+                    folder_path = b[3]
+        display = display_creater.display_creater(
+            terminal_size, folder_path)
 
 
-display = display_creater.display_creater(terminal_size, folder_path_list)
+display = display_creater.display_creater(terminal_size, folder_path)
 
 with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
     listener.join()

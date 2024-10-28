@@ -1,9 +1,9 @@
-import unicodedata
+import is_fullwidth
 
 
 def button(b, display):
     for i, s in enumerate(b[2]):
-        if unicodedata.east_asian_width(s) == "W":
+        if is_fullwidth.is_fullwidth(s):
             del display[b[1]][b[0]+i]
         display[b[1]][b[0]+i] = s
     return display

@@ -1,13 +1,14 @@
-import unicodedata
 import os
 import time
+
+import is_fullwidth
 
 
 def button_press(b, display):
     w_count = 0
     for i, s in enumerate(b[2]):
         display[b[1]][b[0]+i] = "_"
-        if unicodedata.east_asian_width(s) == "W":
+        if is_fullwidth.is_fullwidth(s):
             w_count += 1
     for i in range(w_count):
         display[b[1]].insert(b[0], "_")
