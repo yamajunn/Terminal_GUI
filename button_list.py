@@ -1,7 +1,7 @@
 import os
 
 
-def button_list(folder_path, terminal_size):
+def button_list(folder_path, terminal_size, x):
     files = os.listdir(folder_path)
 
     button_list = []
@@ -10,5 +10,5 @@ def button_list(folder_path, terminal_size):
             break
         if os.path.isdir(os.path.join(folder_path, f)):
             f = "📁 " + f
-        button_list.append([10, i, f])
+        button_list.append([10+50*x, i, f])
     return button_list

@@ -68,8 +68,8 @@ def on_move(mouse_x, mouse_y):
 def on_click(x, y, button, pressed):
     global folder_path_list, display
     if pressed:
-        for f in folder_path_list:
-            for b in button_list.button_list(f, terminal_size):
+        for i, f in enumerate(folder_path_list):
+            for b in button_list.button_list(f, terminal_size, i):
                 if b[0] <= terminal_cursor_x < b[0]+len(b[2][2:]) and b[1] == terminal_cursor_y:
                     button_press.button_press(b, display)
                     folder_path_list.append(
