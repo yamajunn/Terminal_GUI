@@ -33,7 +33,7 @@ terminal_cursor_y = 0
 
 cursor_under_str = ""
 
-folder_path = "./"
+folder_path_list = ["./"]
 
 display = [[" " for _ in range(terminal_size.columns)]
            for _ in range(terminal_size.lines)]
@@ -66,16 +66,19 @@ def on_move(mouse_x, mouse_y):
 
 
 def on_click(x, y, button, pressed):
-    global folder_path
+    global folder_path_list, display
     if pressed:
-        for b in button_list.button_list(folder_path, terminal_size):
-            if b[0] <= terminal_cursor_x < b[0]+len(b[2]) and b[1] == terminal_cursor_y:
-                button_press.button_press(b, display)
-                folder_path += f"{b[2]}/"
-                display_creater.display_creater(terminal_size, folder_path)
+        for f in folder_path_list:
+            for b in button_list.button_list(f, terminal_size):
+                if b[0] <= terminal_cursor_x < b[0]+len(b[2][2:]) and b[1] == terminal_cursor_y:
+                    button_press.button_press(b, display)
+                    folder_path_list.append(
+                        f"{folder_path_list[-1]}{b[2][2:]}/")
+                    display = display_creater.display_creater(
+                        terminal_size, folder_path_list)
 
 
-display_creater.display_creater(terminal_size, folder_path)
+display = display_creater.display_creater(terminal_size, folder_path_list)
 
 with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
     listener.join()
