@@ -1,9 +1,10 @@
 from pynput import mouse
 import subprocess
 import shutil
-import os
-import time
-import unicodedata
+
+import button_list
+import button_press
+import display_creater
 
 # ターミナルのカーソルを非表示にする
 # os.system("tput civis")
@@ -32,40 +33,10 @@ terminal_cursor_y = 0
 
 cursor_under_str = ""
 
-look_path = "./"
+folder_path = "./"
 
 display = [[" " for _ in range(terminal_size.columns)]
            for _ in range(terminal_size.lines)]
-
-
-def button(b):
-    global display
-    for i, s in enumerate(b[2]):
-        if unicodedata.east_asian_width(s) == "W":
-            del display[b[1]][b[0]+i]
-        display[b[1]][b[0]+i] = s
-
-
-def button_press(b):
-    global display
-    b[2] = b[2][1:]
-    w_count = 0
-    for i, s in enumerate(b[2]):
-        display[b[1]][b[0]+i] = "_"
-        if unicodedata.east_asian_width(s) == "W":
-            w_count += 1
-    for i in range(w_count):
-        display[b[1]].insert(b[0], "_")
-    for d in display:
-        print("\n"+"".join(d), end="")
-    for i, s in enumerate(b[2]):
-        if unicodedata.east_asian_width(s) == "W":
-            del display[b[1]][b[0]+i]
-        display[b[1]][b[0]+i] = s
-    time.sleep(0.2)
-    os.system("clear")
-    for d in display:
-        print("\n"+"".join(d), end="")
 
 
 def on_move(mouse_x, mouse_y):
@@ -79,7 +50,6 @@ def on_move(mouse_x, mouse_y):
         output = result.stdout.decode().strip()
         x, y, width, height = map(int, output.replace(",", "").split())
         count = 0
-        # os.system("clear")
     count += 1
 
     if x < mouse_x < x + width and y < mouse_y < y + height:
@@ -91,50 +61,21 @@ def on_move(mouse_x, mouse_y):
         terminal_cursor_y = 0
 
     print(f"\033[{terminal_cursor_y};{terminal_cursor_x}H", end="")
-    # cursor_under_str = display[terminal_cursor_y][terminal_cursor_x]
-    # display[terminal_cursor_y][terminal_cursor_x] = "X"
-    # print(f"\033[0;0H", end="")
-    # for d in display:
-    #     print("\n"+"".join(d), end="")
-    # display[terminal_cursor_y][terminal_cursor_x] = cursor_under_str
 
 # マウスのクリックを監視
 
 
 def on_click(x, y, button, pressed):
-    global look_path
+    global folder_path
     if pressed:
-        for b in button_creater(look_path):
+        for b in button_list.button_list(folder_path, terminal_size):
             if b[0] <= terminal_cursor_x < b[0]+len(b[2]) and b[1] == terminal_cursor_y:
-                button_press(b)
-                look_path += f"{b[2]}/"
-    display_creater()
+                button_press.button_press(b, display)
+                folder_path += f"{b[2]}/"
+                display_creater.display_creater(terminal_size, folder_path)
 
 
-def button_creater(look_path):
-    files = os.listdir(look_path)
-
-    button_list = []
-    for i, f in enumerate(files):
-        if i == terminal_size.lines:
-            break
-        if os.path.isdir(os.path.join(look_path, f)):
-            f = "📁" + f
-        button_list.append([10, i, f])
-    return button_list
-
-
-def display_creater():
-    global display
-    display = [[" " for _ in range(terminal_size.columns)]
-               for _ in range(terminal_size.lines)]
-    for b in button_creater(look_path):
-        button(b)
-    for d in display:
-        print("\n"+"".join(d), end="")
-
-
-display_creater()
+display_creater.display_creater(terminal_size, folder_path)
 
 with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
     listener.join()
