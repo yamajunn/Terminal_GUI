@@ -35,7 +35,7 @@ terminal_cursor_y = 0
 
 cursor_under_str = ""
 
-folder_path = "./"
+folder_path = "./Desktop/BRAD/Datasets/"
 
 # display = [[" " for _ in range(terminal_size.columns)]
 #            for _ in range(terminal_size.lines)]

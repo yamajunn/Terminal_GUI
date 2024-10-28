@@ -1,6 +1,7 @@
 import button_list
 import button
 import folder_path_split
+import is_fullwidth
 
 
 def display_creater(terminal_size, folder_path):
