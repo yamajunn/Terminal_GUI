@@ -1,8 +1,12 @@
 from PIL import Image
+from colorama import Fore, Back, Style, init
+
+# ターミナルカラーを初期化
+init(autoreset=True)
 
 # 設定する画像のサイズ（例: 幅100ピクセル、高さ50ピクセル）
-new_width = 600
-new_height = 200
+new_width = 120
+new_height = 40
 
 # 画像のファイルパスを指定
 image_path = './image2.jpeg'
@@ -25,10 +29,14 @@ for y in range(height):
     pixel_list_x = []
     for x in range(width):
         pixel = pixels[x, y]
+        r, g, b = pixel[:3]  # RGB値
         brightness = sum(pixel[:3]) / (255 * 3)
         closest_char = min(
             chars_list, key=lambda char: abs(char[1] - brightness))[0]
-        pixel_list_x.append(closest_char)
+
+        # ターミナルカラーで文字を表示
+        color_code = f"\033[38;2;{r};{g};{b}m"  # ANSIコードによるRGBカラー指定
+        pixel_list_x.append(f"{color_code}{closest_char}{Style.RESET_ALL}")
     pixel_list.append("".join(pixel_list_x))
 
 # 結果を表示
