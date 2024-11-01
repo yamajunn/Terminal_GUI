@@ -1,8 +1,9 @@
 from PIL import Image
-from colorama import Fore, Back, Style, init
+from rich.console import Console
+from rich.text import Text
 
-# ターミナルカラーを初期化
-init(autoreset=True)
+# コンソールの初期化
+console = Console()
 
 # 設定する画像のサイズ（例: 幅100ピクセル、高さ50ピクセル）
 new_width = 120
@@ -37,7 +38,7 @@ chars_list = [('M', 0.037*27), ('@', 0.037*26), ('%', 0.037*25), ('N', 0.037*24)
 # ピクセルごとのアスキー文字に変換
 pixel_list = []
 for y in range(new_height):
-    pixel_list_x = []
+    line_text = Text()
     for x in range(new_width):
         pixel = pixels[x, y]
         r, g, b = pixel[:3]  # RGB値
@@ -45,11 +46,10 @@ for y in range(new_height):
         closest_char = min(
             chars_list, key=lambda char: abs(char[1] - brightness))[0]
 
-        # ターミナルカラーで文字を表示
-        color_code = f"\033[38;2;{r};{g};{b}m"  # ANSIコードによるRGBカラー指定
-        pixel_list_x.append(f"{color_code}{closest_char}{Style.RESET_ALL}")
-    pixel_list.append("".join(pixel_list_x))
+        # Richでのカラー指定付きの文字を追加
+        line_text.append(closest_char, style=f"rgb({r},{g},{b})")
+    pixel_list.append(line_text)
 
 # 結果を表示
 for line in pixel_list:
-    print(line)
+    console.print(line)
