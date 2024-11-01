@@ -1,12 +1,17 @@
 from pynput import mouse
 import subprocess
 import shutil
+import os
+import sys
 
 import button_list
 import button_press
 import display_creater
 import folder_path_split
-import folder_select
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from image import image_viewer
 
 # ターミナルのカーソルを非表示にする
 # os.system("tput civis")
@@ -75,7 +80,12 @@ def on_click(x, y, button, pressed):
             for b in button_list.button_list(f, terminal_size, i):
                 if b[0] <= terminal_cursor_x < b[0]+len(b[2]) and b[1] == terminal_cursor_y:
                     button_press.button_press(b, display)
-                    folder_path = b[3]
+                    if b[3].endswith('.png'):
+                        image_viewer.image_viewer(
+                            b[3], terminal_size.columns, terminal_size.lines)
+                        return
+                    else:
+                        folder_path = b[3]
         display = display_creater.display_creater(
             terminal_size, folder_path)
 

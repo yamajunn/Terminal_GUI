@@ -4,7 +4,7 @@ from rich.text import Text
 import os
 
 
-def image_preview(image_path, max_width, max_height):
+def image_viewer(image_path, max_width, max_height):
 
     console = Console()
 
@@ -13,7 +13,7 @@ def image_preview(image_path, max_width, max_height):
     original_width, original_height = image.size
 
     width_ratio = max_width / original_width
-    height_ratio = max_height / original_height
+    height_ratio = (max_height-2) / original_height
     scaling_factor = min(width_ratio, height_ratio)
 
     new_width = int(original_width * scaling_factor * 2)
@@ -42,3 +42,4 @@ def image_preview(image_path, max_width, max_height):
 
     for line in pixel_list:
         console.print(line)
+    print("Click to exit")
